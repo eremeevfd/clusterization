@@ -218,23 +218,13 @@ def main() -> None:
         _cluster_to_row(cluster, include_details=detailed_view)
         for cluster in default_order
     ]
-    display = st.dataframe(table_rows, hide_index=True, width="stretch")
-    display_data = getattr(display, "data", None)
-    if display_data is not None and "Cluster ID" in display_data.columns:
-        displayed_ids: list[int] = []
-        for value in display_data["Cluster ID"].tolist():
-            try:
-                displayed_ids.append(int(value))
-            except (TypeError, ValueError):
-                continue
-    else:
-        displayed_ids = [cluster.cluster_id for cluster in default_order]
-
-    ordered_filtered = [
-        clusters_by_id[cluster_id]
-        for cluster_id in displayed_ids
-        if cluster_id in clusters_by_id
+    st.dataframe(table_rows, hide_index=True, width="stretch")
+    displayed_ids = [
+        row["Cluster ID"]
+        for row in table_rows
+        if isinstance(row.get("Cluster ID"), int)
     ]
+    ordered_filtered = [clusters_by_id[cluster_id] for cluster_id in displayed_ids]
 
     filtered_csv = _rows_to_csv(
         [_cluster_to_row(cluster, include_details=True) for cluster in ordered_filtered]
